@@ -11,9 +11,9 @@ vec3 random_in_unit_disk() {
 	return p;
 }
 
-class Camera {
+class DOFCamera {
 public:
-	Camera(vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect, float aperture, float focus_dist) {
+	DOFCamera(vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect, float aperture, float focus_dist) {
 		// vfov is top to bottom in degrees
 		lens_radius = aperture / 2;
 		float theta = vfov * M_PI / 180;

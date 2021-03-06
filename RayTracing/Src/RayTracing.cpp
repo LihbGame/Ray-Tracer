@@ -139,7 +139,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         HDC hdc = BeginPaint(hWnd, &ps);
         if (Redraw)
         {
-            gWorld.DrawSence(&hdc);
+            hdc=GetDC(hWnd);
+            gWorld.DrawDOFSence(&hdc);
             Redraw = false;
         }
         EndPaint(hWnd, &ps);
@@ -154,7 +155,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (!Redraw)
             {
                 Redraw = true;
-                SendMessage(hWnd, WM_PAINT, 0, 0);
+                SendMessage(hWnd, WM_PAINT, 1, 1);
             }
         }
             break;

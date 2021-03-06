@@ -12,10 +12,10 @@ public:
 	int GetWindowHeigh()const { return WindowHeigh; }
 	vec3 Color(const Ray& r,Hitable* world, int depth);
 	Hitable*  InitSence();
-	void DrawSence(HDC* dc);
+	void DrawDOFSence(HDC* dc);
 private:
-	int WindowWidth = 1600;
-	int WindowHeigh = 900;
+	int WindowWidth = 1000;
+	int WindowHeigh = 400;
 };
 
 inline vec3 World::Color(const Ray& r, Hitable* world, int depth)
@@ -24,7 +24,7 @@ inline vec3 World::Color(const Ray& r, Hitable* world, int depth)
 	if (world->hit(r, 0.001, FLT_MAX, rec)) {
 		Ray scattered;
 		vec3 attenuation;
-		if (depth < 200 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+		if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
 			return attenuation * Color(scattered, world, depth + 1);
 		}
 		else {
@@ -80,11 +80,12 @@ inline Hitable* World::InitSence()
 	return new HitableList(list, i);
 }
 
-inline void World::DrawSence(HDC *dc)
+//DOF
+inline void World::DrawDOFSence(HDC *dc)
 {
 	int nx = WindowWidth;
 	int ny = WindowHeigh-40;
-	int ns = 100;
+	int ns = 2;
 
 	Hitable* world = InitSence();
 
@@ -93,7 +94,7 @@ inline void World::DrawSence(HDC *dc)
 	float dist_to_focus = 10.0;
 	float aperture = 0.1;
 
-	Camera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(nx) / float(ny), aperture, dist_to_focus);
+	DOFCamera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(nx) / float(ny), aperture, dist_to_focus);
 
 	for (int j = ny - 1; j >= 0; j--) {
 		for (int i = 0; i < nx; i++) {
