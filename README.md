@@ -1,4 +1,3 @@
 # Ray-Tracer
-Ray Tracing 
-Demo ScreenShot
+DOF:
 ![demo](ScreenShot/screenshot01.png)
