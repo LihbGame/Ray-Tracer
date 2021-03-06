@@ -84,7 +84,7 @@ inline void World::DrawSence(HDC *dc)
 {
 	int nx = WindowWidth;
 	int ny = WindowHeigh-40;
-	int ns = 1000;
+	int ns = 100;
 
 	Hitable* world = InitSence();
 
