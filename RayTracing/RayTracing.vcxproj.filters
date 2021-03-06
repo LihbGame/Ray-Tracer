@@ -28,6 +28,30 @@
     <ClInclude Include="Head\Resource.h">
       <Filter>Head</Filter>
     </ClInclude>
+    <ClInclude Include="Head\Ray.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="Head\Vector3.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="Head\Sphere.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="Head\Hitable.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="Head\Material.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="Head\Random.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="Head\HitableList.h">
+      <Filter>Head</Filter>
+    </ClInclude>
+    <ClInclude Include="Head\World.h">
+      <Filter>Head</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RayTracing.rc">

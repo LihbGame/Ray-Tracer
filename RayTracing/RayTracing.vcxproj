@@ -84,6 +84,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>.\Head;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -115,7 +116,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -144,9 +145,17 @@
   <ItemGroup>
     <ClInclude Include="Head\Camera.h" />
     <ClInclude Include="Head\framework.h" />
+    <ClInclude Include="Head\Hitable.h" />
+    <ClInclude Include="Head\HitableList.h" />
+    <ClInclude Include="Head\Material.h" />
+    <ClInclude Include="Head\Random.h" />
+    <ClInclude Include="Head\Ray.h" />
     <ClInclude Include="Head\RayTracing.h" />
     <ClInclude Include="Head\Resource.h" />
+    <ClInclude Include="Head\Sphere.h" />
     <ClInclude Include="Head\targetver.h" />
+    <ClInclude Include="Head\Vector3.h" />
+    <ClInclude Include="Head\World.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RayTracing.rc" />

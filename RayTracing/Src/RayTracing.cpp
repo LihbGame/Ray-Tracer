@@ -3,6 +3,7 @@
 
 #include "framework.h"
 #include "RayTracing.h"
+#include "World.h"
 
 #define MAX_LOADSTRING 100
 
@@ -10,7 +11,8 @@
 HINSTANCE hInst;                                // 当前实例
 WCHAR szTitle[MAX_LOADSTRING];                  // 标题栏文本
 WCHAR szWindowClass[MAX_LOADSTRING];            // 主窗口类名
-
+World gWorld;   //光追场景
+bool Redraw = true;
 // 此代码模块中包含的函数的前向声明:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -41,6 +43,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     HACCEL hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_RAYTRACING));
 
     MSG msg;
+
+    gWorld.InitSence();
 
     // 主消息循环:
     while (GetMessage(&msg, nullptr, 0, 0))
@@ -98,7 +102,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    hInst = hInstance; // 将实例句柄存储在全局变量中
 
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+      200,100 ,gWorld.GetWindowWidth(), gWorld.GetWindowHeigh(), nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {
@@ -126,17 +130,39 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_COMMAND:
-        {
-        }
-        break;
+    {
+    }
+    break;
     case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+        if (Redraw)
         {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: 在此处添加使用 hdc 的任何绘图代码...
-            EndPaint(hWnd, &ps);
+            gWorld.DrawSence(&hdc);
+            Redraw = false;
         }
-        break;
+        EndPaint(hWnd, &ps);
+    }
+    break;
+    case WM_KEYUP:
+    {
+        switch (wParam)
+        {
+        case  VK_F1:
+        {
+            if (!Redraw)
+            {
+                Redraw = true;
+                SendMessage(hWnd, WM_PAINT, 0, 0);
+            }
+        }
+            break;
+        default:
+            break;
+        }
+    }
+    break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
