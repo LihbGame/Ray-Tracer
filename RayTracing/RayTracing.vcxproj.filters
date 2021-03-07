@@ -52,6 +52,9 @@
     <ClInclude Include="Head\World.h">
       <Filter>Head</Filter>
     </ClInclude>
+    <ClInclude Include="Head\MoveSphere.h">
+      <Filter>Head</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RayTracing.rc">

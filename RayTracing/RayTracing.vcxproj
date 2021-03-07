@@ -148,6 +148,7 @@
     <ClInclude Include="Head\Hitable.h" />
     <ClInclude Include="Head\HitableList.h" />
     <ClInclude Include="Head\Material.h" />
+    <ClInclude Include="Head\MoveSphere.h" />
     <ClInclude Include="Head\Random.h" />
     <ClInclude Include="Head\Ray.h" />
     <ClInclude Include="Head\RayTracing.h" />

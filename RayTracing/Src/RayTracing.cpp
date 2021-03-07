@@ -44,8 +44,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     MSG msg;
 
-    gWorld.InitSence();
-
     // 主消息循环:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
@@ -140,7 +138,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (Redraw)
         {
             hdc=GetDC(hWnd);
-            gWorld.DrawDOFSence(&hdc);
+            gWorld.DrawMotionBlurSence(&hdc);
             Redraw = false;
         }
         EndPaint(hWnd, &ps);
