@@ -55,6 +55,9 @@
     <ClInclude Include="Head\MoveSphere.h">
       <Filter>Head</Filter>
     </ClInclude>
+    <ClInclude Include="Head\AABB.h">
+      <Filter>Head</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RayTracing.rc">

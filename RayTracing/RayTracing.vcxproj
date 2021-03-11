@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Head\AABB.h" />
     <ClInclude Include="Head\Camera.h" />
     <ClInclude Include="Head\framework.h" />
     <ClInclude Include="Head\Hitable.h" />
