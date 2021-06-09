@@ -99,8 +99,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
    hInst = hInstance; // 将实例句柄存储在全局变量中
 
+
+   // Create window
+   RECT rc = { 0, 0,gWorld.GetWindowWidth(),gWorld.GetWindowHeigh()/* (LONG)g_DisplayWidth, (LONG)g_DisplayHeight*/ };
+   AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, false);
+
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      200,100 ,gWorld.GetWindowWidth(), gWorld.GetWindowHeigh(), nullptr, nullptr, hInstance, nullptr);
+      200,100 , rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
 
    if (!hWnd)
    {

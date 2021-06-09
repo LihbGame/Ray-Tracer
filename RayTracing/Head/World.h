@@ -10,6 +10,8 @@
 #include "MoveSphere.h"
 extern bool AppPause;
 using namespace std;
+
+#define ThreadCounts 30
 struct MultiThreadData
 {
 	int nx = 0;
@@ -31,8 +33,8 @@ struct DrawRGB
 class World
 {
 public:
-	int GetWindowWidth()const { return WindowWidth; }
-	int GetWindowHeigh()const { return WindowHeigh; }
+	static int GetWindowWidth(){ return WindowWidth; }
+	static int GetWindowHeigh(){ return WindowHeigh; }
 	static vec3 Color(const Ray& r, Hitable* world, int depth);
 	Hitable* InitDOFSence();
 	Hitable* InitMoveSphereSence();
@@ -43,15 +45,17 @@ public:
 	static void DrawMultiThread(MultiThreadData data);
 	static void ShowSence(MultiThreadData data);
 private:
-	int WindowWidth = 1600;
-	int WindowHeigh = 900;
+	static int WindowWidth;
+	static int WindowHeigh;
 
 	static vector<vector<DrawRGB>> SenceColors;
-	static int ColorCounts[10];
+	static int ColorCounts[ThreadCounts];
 };
 
-int  World::ColorCounts[10];
+int  World::ColorCounts[ThreadCounts];
 vector<vector<DrawRGB>> World::SenceColors;
+int World::WindowWidth = 1600;
+int World::WindowHeigh = 900;
 
 inline vec3 World::Color(const Ray& r, Hitable* world, int depth)
 {
@@ -76,7 +80,7 @@ inline vec3 World::Color(const Ray& r, Hitable* world, int depth)
 inline Hitable* World::InitDOFSence()
 {
 	int n = 500;
-	Hitable** list = new Hitable * [(long)n + 1];
+	Hitable** list = new Hitable* [n + 1];
 	list[0] = new Sphere(vec3(0, -1000, 0), 1000, new Lambertian(vec3(0.5, 0.5, 0.5)));
 	int i = 1;
 	for (int a = -11; a < 11; a++) {
@@ -118,7 +122,7 @@ inline Hitable* World::InitDOFSence()
 inline Hitable* World::InitMoveSphereSence()
 {
 	int n = 50000;
-	Hitable** list = new Hitable * [n + 1];
+	Hitable** list = new Hitable* [n + 1];
 	list[0] = new Sphere(vec3(0, -1000, 0), 1000, new Lambertian(vec3(0.5, 0.5, 0.5)));
 	int i = 1;
 	for (int a = -10; a < 10; a++) {
@@ -150,7 +154,7 @@ inline Hitable* World::InitMoveSphereSence()
 inline void World::DrawDOFSence(HDC* dc)
 {
 	int nx = WindowWidth;
-	int ny = WindowHeigh - 40;
+	int ny = WindowHeigh;
 	int ns = 500;
 
 	Hitable* world = InitDOFSence();
@@ -189,9 +193,9 @@ inline void World::DrawMotionBlurSence(HDC* dc)
 	MultiThreadData data;
 
 	data.nx = WindowWidth;
-	data.ny_max = WindowHeigh - 40;
+	data.ny_max = WindowHeigh;
 	data.ny_min = 0;
-	data.ns = 5;
+	data.ns = 1000;
 
 	data.world = InitMoveSphereSence();
 
@@ -206,31 +210,31 @@ inline void World::DrawMotionBlurSence(HDC* dc)
 
 	data.dc = dc;
 
-	///draw 860/10==86
-	SenceColors.resize(860);
+	///draw
+	SenceColors.resize(WindowHeigh);
 	for (int i = 0; i < SenceColors.size(); i++)
 	{
-		SenceColors[i].resize(1600);
+		SenceColors[i].resize(WindowWidth);
 	}
 
-	std::thread threads[11];
-	for (int i = 0; i < 10; ++i)
+	
+	vector<std::thread> threads(ThreadCounts +1);
+	int PreThread = (WindowHeigh+ ThreadCounts -1) / ThreadCounts;
+	for (int i = 0; i < ThreadCounts; ++i)
 	{
-		data.ny_max = 86 * (i + 1);
-		data.ny_min = 86 * i;
+		data.ny_max = PreThread * (i + 1);
+		data.ny_min = PreThread * i;
 		data.ThreadID = i;
 		threads[i] = std::thread(World::DrawMultiThread, data);
 	}
 
-	//show sence
-	threads[10] = std::thread(World::ShowSence, data);
+	//show scene
+	threads[ThreadCounts] = std::thread(World::ShowSence, data);
 
 	for (auto& th : threads)
 	{
 		th.join();
 	}
-
-
 
 	return;
 }
@@ -244,8 +248,8 @@ inline void World::DrawMultiThread(MultiThreadData data)
 		for (int i = 0; i < data.nx; i++) {
 			vec3 col(0, 0, 0);
 			for (int s = 0; s < data.ns; s++) {
-				float u = float(i + random_double()) / float(data.nx);
-				float v = float(j + random_double()) / float(860);
+				float u = float(i + random_double()) / float(WindowWidth);
+				float v = float(j + random_double()) / float(WindowHeigh);
 				Ray r = data.cam->get_ray(u, v);
 				col += Color(r, data.world, 0);
 			}
@@ -264,11 +268,11 @@ inline void World::ShowSence(MultiThreadData data)
 {
 
 	int counts = 0;
-
+	int AllPixel = WindowHeigh * WindowWidth;
 	do
 	{
 		counts = 0;
-		for (int i = 0; i < 10; ++i)
+		for (int i = 0; i < ThreadCounts; ++i)
 		{
 			counts += ColorCounts[i];
 		}
@@ -279,7 +283,7 @@ inline void World::ShowSence(MultiThreadData data)
 				SetPixel(*(data.dc), j, data.ny_max - i, RGB(SenceColors[i][j].R, SenceColors[i][j].G, SenceColors[i][j].B));
 			}
 		}
-	} while (counts < 1376000);
+	} while (counts < AllPixel);
 }
 
 

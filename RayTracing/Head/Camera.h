@@ -65,7 +65,7 @@ public:
 	// new: add time to construct ray
 	Ray get_ray(float s, float t) {
 		vec3 rd = lens_radius * random_in_unit_disk();
-		vec3 offset = u * rd.x() + v * rd.y();
+		vec3 offset = vec3(0,0,0);// u* rd.x() + v * rd.y();
 		float time = time0 + random_double() * (time1 - time0);
 		return Ray(origin + offset, lower_left_corner + s * horizontal + t * vertical - origin - offset, time);
 	}
