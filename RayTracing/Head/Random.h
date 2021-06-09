@@ -2,5 +2,5 @@
 #include <cstdlib>
 
 inline double random_double() {
-	return rand() / (RAND_MAX + 1.0);
+	return rand() / (RAND_MAX + 1.0f);
 }
