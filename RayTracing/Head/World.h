@@ -19,7 +19,7 @@ struct MultiThreadData
 	int ny_min = 0;
 	int ns = 0;
 	Hitable* world = nullptr;
-	MotionBlurCamera* cam = nullptr;
+	Camera* Cam = nullptr;
 	HDC* dc = nullptr;
 	int ThreadID = 0;
 };
@@ -27,7 +27,9 @@ struct MultiThreadData
 
 struct DrawRGB
 {
-	int R, B, G;
+	int R = 255;
+	int B = 255;
+	int G = 255;
 };
 
 class World
@@ -39,6 +41,8 @@ public:
 	Hitable* InitDOFSence();
 	Hitable* InitMoveSphereSence();
 
+
+	void Draw(MultiThreadData &Data);
 	void DrawDOFSence(HDC* dc);
 	void DrawMotionBlurSence(HDC* dc);
 
@@ -122,7 +126,7 @@ inline Hitable* World::InitDOFSence()
 inline Hitable* World::InitMoveSphereSence()
 {
 	int n = 50000;
-	Hitable** list = new Hitable* [n + 1];
+	Hitable** list = new Hitable*[n + 1];
 	list[0] = new Sphere(vec3(0, -1000, 0), 1000, new Lambertian(vec3(0.5, 0.5, 0.5)));
 	int i = 1;
 	for (int a = -10; a < 10; a++) {
@@ -153,36 +157,25 @@ inline Hitable* World::InitMoveSphereSence()
 //DOF
 inline void World::DrawDOFSence(HDC* dc)
 {
-	int nx = WindowWidth;
-	int ny = WindowHeigh;
-	int ns = 500;
+	MultiThreadData data;
 
-	Hitable* world = InitDOFSence();
+	data.nx = WindowWidth;
+	data.ny_max = WindowHeigh;
+	data.ny_min = 0;
+	data.ns = 500;
+
+	data.world = InitDOFSence();
 
 	vec3 lookfrom(13, 2, 3);
 	vec3 lookat(0, 0, 0);
 	float dist_to_focus = 10.0f;
 	float aperture = 0.1f;
 
-	DOFCamera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(nx) / float(ny), aperture, dist_to_focus);
+	DOFCamera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(data.nx) / float(data.ny_max), aperture, dist_to_focus);
+	data.Cam = &cam;
+	data.dc = dc;
 
-	for (int j = ny - 1; j >= 0; j--) {
-		for (int i = 0; i < nx; i++) {
-			vec3 col(0, 0, 0);
-			for (int s = 0; s < ns; s++) {
-				float u = float(i + random_double()) / float(nx);
-				float v = float(j + random_double()) / float(ny);
-				Ray r = cam.get_ray(u, v);
-				col += Color(r, world, 0);
-			}
-			col /= float(ns);
-			col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
-			int ir = int(255.99 * col[0]);
-			int ig = int(255.99 * col[1]);
-			int ib = int(255.99 * col[2]);
-			SetPixel(*dc, i, ny - j, RGB(ir, ig, ib));
-		}
-	}
+	Draw(data);
 }
 
 
@@ -205,38 +198,10 @@ inline void World::DrawMotionBlurSence(HDC* dc)
 	float aperture = 0.1f;
 
 	MotionBlurCamera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(data.nx) / float(data.ny_max), aperture, dist_to_focus, 0.0f, 1.0f);
-
-	data.cam = &cam;
-
+	data.Cam = &cam;
 	data.dc = dc;
 
-	///draw
-	SenceColors.resize(WindowHeigh);
-	for (int i = 0; i < SenceColors.size(); i++)
-	{
-		SenceColors[i].resize(WindowWidth);
-	}
-
-	
-	vector<std::thread> threads(ThreadCounts +1);
-	int PreThread = (WindowHeigh+ ThreadCounts -1) / ThreadCounts;
-	for (int i = 0; i < ThreadCounts; ++i)
-	{
-		data.ny_max = PreThread * (i + 1);
-		data.ny_min = PreThread * i;
-		data.ThreadID = i;
-		threads[i] = std::thread(World::DrawMultiThread, data);
-	}
-
-	//show scene
-	threads[ThreadCounts] = std::thread(World::ShowSence, data);
-
-	for (auto& th : threads)
-	{
-		th.join();
-	}
-
-	return;
+	Draw(data);
 }
 
 
@@ -250,7 +215,7 @@ inline void World::DrawMultiThread(MultiThreadData data)
 			for (int s = 0; s < data.ns; s++) {
 				float u = float(i + random_double()) / float(WindowWidth);
 				float v = float(j + random_double()) / float(WindowHeigh);
-				Ray r = data.cam->get_ray(u, v);
+				Ray r = data.Cam->get_ray(u, v);
 				col += Color(r, data.world, 0);
 			}
 			col /= float(data.ns);
@@ -287,5 +252,32 @@ inline void World::ShowSence(MultiThreadData data)
 }
 
 
+inline void World::Draw(MultiThreadData& data)
+{
+	///draw
+	SenceColors.resize(WindowHeigh);
+	for (int i = 0; i < SenceColors.size(); i++)
+	{
+		SenceColors[i].resize(WindowWidth);
+	}
 
+
+	vector<std::thread> threads(ThreadCounts + 1);
+	int PreThread = (WindowHeigh + ThreadCounts - 1) / ThreadCounts;
+	for (int i = 0; i < ThreadCounts; ++i)
+	{
+		data.ny_max = PreThread * (i + 1);
+		data.ny_min = PreThread * i;
+		data.ThreadID = i;
+		threads[i] = std::thread(World::DrawMultiThread, data);
+	}
+
+	//show scene
+	threads[ThreadCounts] = std::thread(World::ShowSence, data);
+
+	for (auto& th : threads)
+	{
+		th.join();
+	}
+}
 

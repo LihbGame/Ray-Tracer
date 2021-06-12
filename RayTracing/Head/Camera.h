@@ -11,8 +11,30 @@ vec3 random_in_unit_disk() {
 	return p;
 }
 
-class DOFCamera {
+class Camera
+{
 public:
+	Camera();
+	~Camera();
+
+	virtual Ray get_ray(float s, float t) = 0;
+private:
+
+};
+
+Camera::Camera()
+{
+}
+
+Camera::~Camera()
+{
+}
+
+
+
+class DOFCamera :public Camera
+{
+public: 
 	DOFCamera(vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect, float aperture, float focus_dist) {
 		// vfov is top to bottom in degrees
 		lens_radius = aperture / 2;
@@ -27,7 +49,7 @@ public:
 		horizontal = 2 * half_width  * u;
 		vertical = 2 * half_height  * v;
 	}
-	Ray get_ray(float s, float t) {
+	virtual Ray get_ray(float s, float t) {
 		vec3 rd = lens_radius * random_in_unit_disk();
 		vec3 offset = u * rd.x() + v * rd.y();
 		return Ray(origin + offset, lower_left_corner + s * horizontal + t * vertical - origin - offset);
@@ -43,7 +65,8 @@ public:
 
 
 
-class MotionBlurCamera {
+class MotionBlurCamera :public Camera
+{
 public:
 	// new:  add t0 and t1
 	MotionBlurCamera(vec3 lookfrom, vec3 lookat, vec3 vup, float vfov, float aspect, float aperture, float focus_dist, float t0, float t1) { // vfov is top to bottom in degrees
@@ -63,7 +86,7 @@ public:
 	}
 
 	// new: add time to construct ray
-	Ray get_ray(float s, float t) {
+	virtual Ray get_ray(float s, float t) {
 		vec3 rd = lens_radius * random_in_unit_disk();
 		vec3 offset = vec3(0,0,0);// u* rd.x() + v * rd.y();
 		float time = time0 + random_double() * (time1 - time0);

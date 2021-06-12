@@ -143,7 +143,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         if (Redraw)
         {
             hdc=GetDC(hWnd);
-            gWorld.DrawMotionBlurSence(&hdc);
+            gWorld.DrawDOFSence(&hdc);
             Redraw = false;
         }
         EndPaint(hWnd, &ps);
