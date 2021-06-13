@@ -58,6 +58,9 @@
     <ClInclude Include="Head\AABB.h">
       <Filter>Head</Filter>
     </ClInclude>
+    <ClInclude Include="Head\BVH.h">
+      <Filter>Head</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RayTracing.rc">

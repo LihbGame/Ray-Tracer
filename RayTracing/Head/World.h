@@ -8,6 +8,8 @@
 #include "Material.h"
 #include "Random.h"
 #include "MoveSphere.h"
+#include "BVH.h"
+
 #include <windows.h>
 extern bool AppPause;
 using namespace std;
@@ -65,7 +67,7 @@ int World::WindowHeigh = 900;
 inline vec3 World::Color(const Ray& r, Hitable* world, int depth)
 {
 	Hit_Record rec;
-	if (world->hit(r, 0.001, FLT_MAX, rec)) {
+	if (world->hit(r, 0.001f, FLT_MAX, rec)) {
 		Ray scattered;
 		vec3 attenuation;
 		if (depth < 5 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
@@ -77,8 +79,8 @@ inline vec3 World::Color(const Ray& r, Hitable* world, int depth)
 	}
 	else {
 		vec3 unit_direction = unit_vector(r.direction());
-		float t = 0.5 * (unit_direction.y() + 1.0);
-		return (1.0 - t) * vec3(1.0, 1.0, 1.0) + t * vec3(0.5, 0.7, 1.0);
+		float t = 0.5f * (unit_direction.y() + 1.0f);
+		return (1.0f - t) * vec3(1.0f, 1.0f, 1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
 	}
 }
 
@@ -86,42 +88,42 @@ inline Hitable* World::InitDOFSence()
 {
 	int n = 500;
 	Hitable** list = new Hitable* [n + 1];
-	list[0] = new Sphere(vec3(0, -1000, 0), 1000, new Lambertian(vec3(0.5, 0.5, 0.5)));
+	list[0] = new Sphere(vec3(0, -1000, 0), 1000, new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
 	int i = 1;
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
 			float choose_mat = random_double();
-			vec3 center(a + 0.9 * random_double(), 0.2, b + 0.9 * random_double());
-			if ((center - vec3(4, 0.2, 0)).length() > 0.9) {
-				if (choose_mat < 0.8) {  // diffuse
+			vec3 center(a + 0.9f * random_double(), 0.2f, b + 0.9f * random_double());
+			if ((center - vec3(4, 0.2f, 0)).length() > 0.9f) {
+				if (choose_mat < 0.8f) {  // diffuse
 					list[i++] = new Sphere(
-						center, 0.2,
+						center, 0.2f,
 						new Lambertian(vec3(random_double() * random_double(),
 							random_double() * random_double(),
 							random_double() * random_double()))
 					);
 				}
-				else if (choose_mat < 0.95) { // metal
+				else if (choose_mat < 0.95f) { // metal
 					list[i++] = new Sphere(
-						center, 0.2,
-						new Metal(vec3(0.5 * (1 + random_double()),
-							0.5 * (1 + random_double()),
-							0.5 * (1 + random_double())),
-							0.5 * random_double())
+						center, 0.2f,
+						new Metal(vec3(0.5f * (1 + random_double()),
+							0.5f * (1 + random_double()),
+							0.5f * (1 + random_double())),
+							0.5f * random_double())
 					);
 				}
 				else {  // glass
-					list[i++] = new Sphere(center, 0.2, new Dielectric(1.5));
+					list[i++] = new Sphere(center, 0.2f, new Dielectric(1.5f));
 				}
 			}
 		}
 	}
 
 	list[i++] = new Sphere(vec3(0, 1, 0), 1.0, new Dielectric(1.5));
-	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0, new Lambertian(vec3(0.4, 0.2, 0.1)));
-	list[i++] = new Sphere(vec3(4, 1, 0), 1.0, new Metal(vec3(0.7, 0.6, 0.5), 0.0));
+	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0, new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
+	list[i++] = new Sphere(vec3(4, 1, 0), 1.0, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0));
 
-	return new HitableList(list, i);
+	return new BVH_Node(list, i,0.0f,0.0f);
 }
 
 inline Hitable* World::InitMoveSphereSence()
@@ -152,7 +154,7 @@ inline Hitable* World::InitMoveSphereSence()
 	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0f, new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
 	list[i++] = new Sphere(vec3(4, 1, 0), 1.0f, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
 
-	return new HitableList(list, i);
+	return new BVH_Node(list,i,0.0f,1.0f);
 }
 
 //DOF
