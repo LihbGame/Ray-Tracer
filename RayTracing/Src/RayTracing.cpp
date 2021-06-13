@@ -103,6 +103,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    RECT rc = { 0, 0,gWorld.GetWindowWidth(),gWorld.GetWindowHeigh()/* (LONG)g_DisplayWidth, (LONG)g_DisplayHeight*/ };
    AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, false);
 
+   gWorld.SetWindowHeigh(rc.bottom - rc.top);
+   gWorld.SetWindowWidth(rc.right - rc.left);
+
    HWND hWnd = CreateWindowW(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
       200,100 , rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance, nullptr);
 

@@ -9,6 +9,9 @@
 #include "Random.h"
 #include "MoveSphere.h"
 #include "BVH.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image.h"
+#include "stb_image_write.h"
 
 #include <windows.h>
 extern bool AppPause;
@@ -39,7 +42,9 @@ class World
 {
 public:
 	static int GetWindowWidth(){ return WindowWidth; }
+	static void SetWindowWidth(int width) {  WindowWidth=width; }
 	static int GetWindowHeigh(){ return WindowHeigh; }
+	static void SetWindowHeigh(int Height) { WindowHeigh=Height; }
 	static vec3 Color(const Ray& r, Hitable* world, int depth);
 	Hitable* InitDOFSence();
 	Hitable* InitMoveSphereSence();
@@ -70,7 +75,7 @@ inline vec3 World::Color(const Ray& r, Hitable* world, int depth)
 	if (world->hit(r, 0.001f, FLT_MAX, rec)) {
 		Ray scattered;
 		vec3 attenuation;
-		if (depth < 5 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
+		if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
 			return attenuation * Color(scattered, world, depth + 1);
 		}
 		else {
@@ -223,9 +228,9 @@ inline void World::DrawMultiThread(MultiThreadData data)
 			}
 			col /= float(data.ns);
 			col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
-			SenceColors[j][i].R = int(255.99 * col[0]);
-			SenceColors[j][i].G = int(255.99 * col[1]);
-			SenceColors[j][i].B = int(255.99 * col[2]);
+			SenceColors[j][i].R = char(255.99 * col[0]);
+			SenceColors[j][i].G = char(255.99 * col[1]);
+			SenceColors[j][i].B = char(255.99 * col[2]);
 			++ColorCounts[data.ThreadID];
 		}
 	}
@@ -234,9 +239,9 @@ inline void World::DrawMultiThread(MultiThreadData data)
 
 inline void World::ShowSence(MultiThreadData data)
 {
-
 	int counts = 0;
 	int AllPixel = WindowHeigh * WindowWidth;
+	char* colorPNG = new char[AllPixel * 3];
 	do
 	{
 		counts = 0;
@@ -248,28 +253,43 @@ inline void World::ShowSence(MultiThreadData data)
 		{
 			for (int j = 0; j < SenceColors[i].size(); ++j)
 			{
+				//run time data
 				SetPixel(*(data.dc), j, data.ny_max - i, RGB(SenceColors[i][j].R, SenceColors[i][j].G, SenceColors[i][j].B));
+				//png file data
+				int temp = ((data.ny_max - i - 1) * WindowWidth + j) * 3;
+				colorPNG[temp] = SenceColors[i][j].R;
+				colorPNG[temp + 1] = SenceColors[i][j].G;
+				colorPNG[temp + 2] = SenceColors[i][j].B;
 			}
 		}
+
 	} while (counts < AllPixel);
+
+	stbi_write_png("RayTracing.png", WindowWidth,WindowHeigh, 3, (char *)colorPNG, 0);
+	delete colorPNG;
 }
 
 
 inline void World::Draw(MultiThreadData& data)
 {
 	///draw
+
+	vector<std::thread> threads(ThreadCounts + 1);
+	int PreThread = (WindowHeigh + ThreadCounts - 1) / ThreadCounts;
+
 	SenceColors.resize(WindowHeigh);
 	for (int i = 0; i < SenceColors.size(); i++)
 	{
 		SenceColors[i].resize(WindowWidth);
 	}
 
-
-	vector<std::thread> threads(ThreadCounts + 1);
-	int PreThread = (WindowHeigh + ThreadCounts - 1) / ThreadCounts;
 	for (int i = 0; i < ThreadCounts; ++i)
 	{
 		data.ny_max = PreThread * (i + 1);
+		if(data.ny_max>WindowHeigh)
+		{
+			data.ny_max = WindowHeigh;
+		}
 		data.ny_min = PreThread * i;
 		data.ThreadID = i;
 		threads[i] = std::thread(World::DrawMultiThread, data);
