@@ -1,6 +1,7 @@
 #pragma once
 #include <thread>
 #include <vector>
+#include "AABB.h"
 #include "Sphere.h"
 #include "HitableList.h"
 #include "float.h"

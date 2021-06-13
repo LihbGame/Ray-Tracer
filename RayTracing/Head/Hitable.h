@@ -1,6 +1,5 @@
 #pragma once
 #include "ray.h"
-
 class Material;
 
 struct Hit_Record
