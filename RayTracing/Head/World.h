@@ -1,7 +1,6 @@
 #pragma once
 #include <thread>
 #include <vector>
-#include "AABB.h"
 #include "Sphere.h"
 #include "HitableList.h"
 #include "float.h"
@@ -9,6 +8,7 @@
 #include "Material.h"
 #include "Random.h"
 #include "MoveSphere.h"
+#include <windows.h>
 extern bool AppPause;
 using namespace std;
 

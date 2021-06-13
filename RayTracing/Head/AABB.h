@@ -11,8 +11,8 @@ public:
 	AABB() {}
 	AABB ( vec3& a,  vec3& b) { _min = a; _max = b; }
 
-	vec3 GetMin() const { return _min; }
-	vec3 GetMax() const { return _max; }
+	vec3 min() const { return _min; }
+	vec3 max() const { return _max; }
 
 	bool hit(const Ray& r, float tmin, float tmax) const {
 		float t0 = 0.0f;
@@ -40,12 +40,12 @@ private:
 };
 
 AABB  Surrounding_box(AABB  box0, AABB  box1) {
-	vec3 small(ffmin(box0.GetMin().x(), box1.GetMin().x()),
-		ffmin(box0.GetMin().y(), box1.GetMin().y()),
-		ffmin(box0.GetMin().z(), box1.GetMin().z()));
-	vec3 big(ffmax(box0.GetMax().x(), box1.GetMax().x()),
-		ffmax(box0.GetMax().y(), box1.GetMax().y()),
-		ffmax(box0.GetMax().z(), box1.GetMax().z()));
+	vec3 small(ffmin(box0.min().x(), box1.min().x()),
+		ffmin(box0.min().y(), box1.min().y()),
+		ffmin(box0.min().z(), box1.min().z()));
+	vec3 big(ffmax(box0.max().x(), box1.max().x()),
+		ffmax(box0.max().y(), box1.max().y()),
+		ffmax(box0.max().z(), box1.max().z()));
 	return AABB(small, big);
 }
 
