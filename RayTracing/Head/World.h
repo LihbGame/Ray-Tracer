@@ -61,7 +61,7 @@ public:
 	static void ShowSence(MultiThreadData data);
 private:
 	Hitable** list = nullptr;
-
+	vector<Material*> NeedFreeMaterial;
 	int NewActor = 0;
 	static int WindowWidth;
 	static int WindowHeigh;
@@ -77,6 +77,16 @@ int World::WindowHeigh = 900;
 
 World::~World()
 {
+	for (auto &e:NeedFreeMaterial)
+	{
+		if (e != nullptr)
+		{
+			delete e;
+			e = nullptr;
+		}
+	}
+
+
 	if (list != nullptr)
 	{
 		for (int i=0;i<NewActor;++i)
@@ -116,12 +126,12 @@ inline Hitable* World::InitDOFSence()
 {
 	int n = ActorCounts;
 	list = new Hitable* [n];
-	list[0] = new Sphere(vec3(0, -1000, 0), 1000,
-		new Lambertian(
-			new Checker_Texture(
-				new Constant_Texture(vec3(0.2, 0.3, 0.1)),
-				new Constant_Texture(vec3(0.9, 0.9, 0.9))
-			)));
+
+	Texture* Checker1 = new Constant_Texture(vec3(0.2, 0.3, 0.1));
+	Texture* Checker2 = new Constant_Texture(vec3(0.9, 0.9, 0.9));
+	Material* CheckerMate = new Lambertian(new Checker_Texture(Checker1, Checker2));
+	NeedFreeMaterial.push_back(CheckerMate);
+	list[0] = new Sphere(vec3(0, -1000, 0), 1000,CheckerMate);
 	int i = 1;
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
@@ -129,33 +139,43 @@ inline Hitable* World::InitDOFSence()
 			vec3 center(a + 0.9f * random_double(), 0.2f, b + 0.9f * random_double());
 			if ((center - vec3(4, 0.2f, 0)).length() > 0.9f) {
 				if (choose_mat < 0.8f) {  // diffuse
-					list[i++] = new Sphere(
-						center, 0.2f,
-						new Lambertian(new Constant_Texture(vec3(
-							random_double() * random_double(),
-							random_double() * random_double(),
-							random_double() * random_double())))
-					);
+
+					Texture* diffuseTexture = new Constant_Texture(vec3(
+						random_double() * random_double(),
+						random_double() * random_double(),
+						random_double() * random_double()));
+					Material* Mate = new Lambertian(diffuseTexture);
+					NeedFreeMaterial.push_back(Mate);
+					list[i++] = new Sphere(center, 0.2f,Mate);
 				}
 				else if (choose_mat < 0.95f) { // metal
-					list[i++] = new Sphere(
-						center, 0.2f,
-						new Metal(vec3(0.5f * (1 + random_double()),
-							0.5f * (1 + random_double()),
-							0.5f * (1 + random_double())),
-							0.5f * random_double())
-					);
+
+					Material* Mate = new Metal(vec3(0.5f * (1 + random_double()),
+						0.5f * (1 + random_double()),
+						0.5f * (1 + random_double())),
+						0.5f * random_double());
+					NeedFreeMaterial.push_back(Mate);
+					list[i++] = new Sphere(center, 0.2f, Mate);
 				}
 				else {  // glass
-					list[i++] = new Sphere(center, 0.2f, new Dielectric(1.5f));
+					Material* Mate = new Dielectric(1.5f);
+					NeedFreeMaterial.push_back(Mate);
+					list[i++] = new Sphere(center, 0.2f, Mate);
 				}
 			}
 		}
 	}
 
-	list[i++] = new Sphere(vec3(0, 1, 0), 1.0, new Dielectric(1.5));
-	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0, new Lambertian(new Constant_Texture(vec3(0.4f, 0.2f, 0.1f))));
-	list[i++] = new Sphere(vec3(4, 1, 0), 1.0, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0));
+	Material* MateDielectric = new Dielectric(1.5);
+	Material* MateLambertian = new Lambertian(new Constant_Texture(vec3(0.4f, 0.2f, 0.1f)));
+	Material* MateMetal = new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0);
+	NeedFreeMaterial.push_back(MateDielectric);
+	NeedFreeMaterial.push_back(MateLambertian);
+	NeedFreeMaterial.push_back(MateMetal);
+
+	list[i++] = new Sphere(vec3(0, 1, 0), 1.0, MateDielectric);
+	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0, MateLambertian);
+	list[i++] = new Sphere(vec3(4, 1, 0), 1.0, MateMetal);
 	
 	NewActor = i;
 	return new BVH_Node(list, i,0.0f,0.0f);
