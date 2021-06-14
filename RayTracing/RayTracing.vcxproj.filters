@@ -67,6 +67,9 @@
     <ClInclude Include="Head\stb_image_write.h">
       <Filter>Head</Filter>
     </ClInclude>
+    <ClInclude Include="Head\Texture.h">
+      <Filter>Head</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RayTracing.rc">

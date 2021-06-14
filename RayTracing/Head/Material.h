@@ -2,7 +2,7 @@
 #include "ray.h"
 #include "Hitable.h"
 #include "Random.h"
-
+#include "Texture.h"
 struct Hit_Record;
 
 float schlick(float cosine, float ref_idx) {
@@ -41,25 +41,36 @@ vec3 random_in_unit_sphere() {
 
 class Material {
 public:
+	virtual ~Material() {};
 	virtual bool scatter(const Ray& r_in, const Hit_Record& rec, vec3& attenuation, Ray& scattered) const = 0;
 };
 
 
-class Lambertian : public Material {
+class Lambertian : public Material 
+{
 public:
-	Lambertian(const vec3& a) : albedo(a) {}
+	Lambertian(Texture* a) : albedo(a) {}
+	~Lambertian()
+	{
+		if (albedo != nullptr)
+		{
+			delete albedo;
+			albedo = nullptr;
+		}
+	}
 	virtual bool scatter(const Ray& r_in, const Hit_Record& rec, vec3& attenuation, Ray& scattered) const {
 		vec3 target = rec.p + rec.normal + random_in_unit_sphere();
 		scattered = Ray(rec.p, target - rec.p,r_in.time());
-		attenuation = albedo;
+		attenuation = albedo->value(0,0,rec.p);
 		return true;
 	}
-
-	vec3 albedo;
+private:
+	Texture *albedo=nullptr;
 };
 
 
-class Metal : public Material {
+class Metal : public Material 
+{
 public:
 	Metal(const vec3& a, float f) : albedo(a) { if (f < 1) fuzz = f; else fuzz = 1; }
 	virtual bool scatter(const Ray& r_in, const Hit_Record& rec, vec3& attenuation, Ray& scattered) const {
@@ -68,12 +79,14 @@ public:
 		attenuation = albedo;
 		return (dot(scattered.direction(), rec.normal) > 0);
 	}
+private:
 	vec3 albedo;
 	float fuzz;
 };
 
 
-class Dielectric : public Material {
+class Dielectric : public Material 
+{
 public:
 	Dielectric(float ri) : ref_idx(ri) {}
 	virtual bool scatter(const Ray& r_in, const Hit_Record& rec, vec3& attenuation, Ray& scattered) const {
@@ -106,6 +119,6 @@ public:
 			scattered = Ray(rec.p, refracted, r_in.time());
 		return true;
 	}
-
+private:
 	float ref_idx;
 };

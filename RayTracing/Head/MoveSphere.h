@@ -4,6 +4,14 @@
 class MoveSphere : public Hitable {
 public:
 	MoveSphere():time0(0.0f),time1(0.0f) {}
+	~MoveSphere()
+	{
+		if (mat_ptr != nullptr)
+		{
+			delete mat_ptr;
+			mat_ptr = nullptr;
+		}
+	}
 	MoveSphere(vec3 cen0, vec3 cen1, float t0, float t1, float r, Material* m) : center0(cen0), center1(cen1), time0(t0), time1(t1), radius(r), mat_ptr(m) {};
 	virtual bool hit(const Ray& r, float tmin, float tmax, Hit_Record& rec) const;
 	vec3 center(float time) const;

@@ -5,13 +5,21 @@
 class Sphere : public Hitable {
 public:
 	Sphere() {}
+	~Sphere()
+	{
+		if (mat_ptr != nullptr)
+		{
+			delete mat_ptr;
+			mat_ptr = nullptr;
+		}
+	}
 	Sphere(vec3 cen, float r, Material* m) : center(cen), radius(r), mat_ptr(m) {};
 	virtual bool hit(const Ray& r, float tmin, float tmax, Hit_Record& rec) const;
 	virtual bool bounding_box(float t0, float t1, AABB& box) const;
 private:
 	vec3 center;
 	float radius = 0.0f;
-	Material* mat_ptr=NULL;
+	Material* mat_ptr=nullptr;
 };
 
 

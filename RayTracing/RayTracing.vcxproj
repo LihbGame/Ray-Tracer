@@ -159,6 +159,7 @@
     <ClInclude Include="Head\stb_image.h" />
     <ClInclude Include="Head\stb_image_write.h" />
     <ClInclude Include="Head\targetver.h" />
+    <ClInclude Include="Head\Texture.h" />
     <ClInclude Include="Head\Vector3.h" />
     <ClInclude Include="Head\World.h" />
   </ItemGroup>

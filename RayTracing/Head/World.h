@@ -18,6 +18,7 @@ extern bool AppPause;
 using namespace std;
 
 #define ThreadCounts 30
+#define ActorCounts 500
 struct MultiThreadData
 {
 	int nx = 0;
@@ -41,6 +42,8 @@ struct DrawRGB
 class World
 {
 public:
+	~World();
+
 	static int GetWindowWidth(){ return WindowWidth; }
 	static void SetWindowWidth(int width) {  WindowWidth=width; }
 	static int GetWindowHeigh(){ return WindowHeigh; }
@@ -57,6 +60,9 @@ public:
 	static void DrawMultiThread(MultiThreadData data);
 	static void ShowSence(MultiThreadData data);
 private:
+	Hitable** list = nullptr;
+
+	int NewActor = 0;
 	static int WindowWidth;
 	static int WindowHeigh;
 
@@ -68,6 +74,23 @@ int  World::ColorCounts[ThreadCounts];
 vector<vector<DrawRGB>> World::SenceColors;
 int World::WindowWidth = 1600;
 int World::WindowHeigh = 900;
+
+World::~World()
+{
+	if (list != nullptr)
+	{
+		for (int i=0;i<NewActor;++i)
+		{
+			if (list[i] != nullptr)
+			{
+				delete list[i];
+				list[i] = nullptr;
+			}
+		}
+		delete []list;
+		list = nullptr;
+	}
+}
 
 inline vec3 World::Color(const Ray& r, Hitable* world, int depth)
 {
@@ -91,9 +114,14 @@ inline vec3 World::Color(const Ray& r, Hitable* world, int depth)
 
 inline Hitable* World::InitDOFSence()
 {
-	int n = 500;
-	Hitable** list = new Hitable* [n + 1];
-	list[0] = new Sphere(vec3(0, -1000, 0), 1000, new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
+	int n = ActorCounts;
+	list = new Hitable* [n];
+	list[0] = new Sphere(vec3(0, -1000, 0), 1000,
+		new Lambertian(
+			new Checker_Texture(
+				new Constant_Texture(vec3(0.2, 0.3, 0.1)),
+				new Constant_Texture(vec3(0.9, 0.9, 0.9))
+			)));
 	int i = 1;
 	for (int a = -11; a < 11; a++) {
 		for (int b = -11; b < 11; b++) {
@@ -103,9 +131,10 @@ inline Hitable* World::InitDOFSence()
 				if (choose_mat < 0.8f) {  // diffuse
 					list[i++] = new Sphere(
 						center, 0.2f,
-						new Lambertian(vec3(random_double() * random_double(),
+						new Lambertian(new Constant_Texture(vec3(
 							random_double() * random_double(),
-							random_double() * random_double()))
+							random_double() * random_double(),
+							random_double() * random_double())))
 					);
 				}
 				else if (choose_mat < 0.95f) { // metal
@@ -125,17 +154,23 @@ inline Hitable* World::InitDOFSence()
 	}
 
 	list[i++] = new Sphere(vec3(0, 1, 0), 1.0, new Dielectric(1.5));
-	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0, new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
+	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0, new Lambertian(new Constant_Texture(vec3(0.4f, 0.2f, 0.1f))));
 	list[i++] = new Sphere(vec3(4, 1, 0), 1.0, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0));
-
+	
+	NewActor = i;
 	return new BVH_Node(list, i,0.0f,0.0f);
 }
 
 inline Hitable* World::InitMoveSphereSence()
 {
-	int n = 50000;
-	Hitable** list = new Hitable*[n + 1];
-	list[0] = new Sphere(vec3(0, -1000, 0), 1000, new Lambertian(vec3(0.5, 0.5, 0.5)));
+	int n = ActorCounts;
+	list = new Hitable*[n];
+	list[0] = new Sphere(vec3(0, -1000, 0), 1000,
+		new Lambertian(
+			new Checker_Texture(
+				new Constant_Texture(vec3(0.2, 0.3, 0.1)),
+				new Constant_Texture(vec3(0.9, 0.9, 0.9))
+			)));
 	int i = 1;
 	for (int a = -10; a < 10; a++) {
 		for (int b = -10; b < 10; b++) {
@@ -143,7 +178,7 @@ inline Hitable* World::InitMoveSphereSence()
 			vec3 center(a + 0.9f * random_double(), 0.2f, b + 0.9f * random_double());
 			if ((center - vec3(4, 0.2f, 0)).length() > 0.9f) {
 				if (choose_mat < 0.8f) {  // diffuse
-					list[i++] = new MoveSphere(center, center + vec3(0, 0.5f * random_double(), 0), 0.0f, 1.0f, 0.2f, new Lambertian(vec3(random_double() * random_double(), random_double() * random_double(), random_double() * random_double())));
+					list[i++] = new MoveSphere(center, center + vec3(0, 0.5f * random_double(), 0), 0.0f, 1.0f, 0.2f, new Lambertian(new Constant_Texture(vec3(random_double() * random_double(), random_double() * random_double(), random_double() * random_double()))));
 				}
 				else if (choose_mat < 0.95f) { // metal
 					list[i++] = new Sphere(center, 0.2f, new Metal(vec3(0.5f * (1 + random_double()), 0.5f * (1 + random_double()), 0.5f * (1 + random_double())), 0.5f * random_double()));
@@ -156,7 +191,7 @@ inline Hitable* World::InitMoveSphereSence()
 	}
 
 	list[i++] = new Sphere(vec3(0, 1, 0), 1.0f, new Dielectric(1.5f));
-	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0f, new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
+	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0f, new Lambertian(new Constant_Texture(vec3(0.4f, 0.2f, 0.1f))));
 	list[i++] = new Sphere(vec3(4, 1, 0), 1.0f, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
 
 	return new BVH_Node(list,i,0.0f,1.0f);
@@ -241,7 +276,8 @@ inline void World::ShowSence(MultiThreadData data)
 {
 	int counts = 0;
 	int AllPixel = WindowHeigh * WindowWidth;
-	char* colorPNG = new char[AllPixel * 3];
+	int PNGSize = AllPixel * 3;
+	char* colorPNG = new char[PNGSize];
 	do
 	{
 		counts = 0;
@@ -266,7 +302,7 @@ inline void World::ShowSence(MultiThreadData data)
 	} while (counts < AllPixel);
 
 	stbi_write_png("RayTracing.png", WindowWidth,WindowHeigh, 3, (char *)colorPNG, 0);
-	delete colorPNG;
+	delete []colorPNG;
 }
 
 
