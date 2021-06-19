@@ -1,5 +1,6 @@
 #pragma once
 #include "Vector3.h"
+#include "Perlin.h"
 
 class Texture 
 {
@@ -39,4 +40,20 @@ public:
 private:
 	Texture* odd=nullptr;
 	Texture* even = nullptr;
+};
+
+
+
+class Noise_Texture : public Texture {
+public:
+	Noise_Texture() {}
+	Noise_Texture(float sc) : scale(sc) {}
+	virtual vec3 value(float u, float v, const vec3& p) const {
+		//            return vec3(1,1,1)*0.5*(1 + noise.Turbulence(scale * p));
+		//            return vec3(1,1,1)*noise.Turbulence(scale * p);
+		return vec3(1, 1, 1) * 0.5 * (1 + sin(scale * p.y() + 5 * noise.Turbulence(scale * p)));
+	}
+private:
+	perlin noise;
+	float scale;
 };
