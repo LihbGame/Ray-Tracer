@@ -9,7 +9,9 @@
 #include "Random.h"
 #include "MoveSphere.h"
 #include "BVH.h"
+
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "stb_image_write.h"
 
@@ -126,8 +128,12 @@ inline Hitable* World::InitDOFSence()
 {
 	list = new Hitable* [ActorCounts];
 
-	Texture* Checker1 = new Constant_Texture(vec3(0.2f, 0.3f, 0.1f));
-	Texture* Checker2 = new Constant_Texture(vec3(0.9f, 0.9f, 0.9f));
+	Texture* Checker1 = new Constant_Texture(vec3(0.2f, 0.2f, 0.2f));
+	Texture* Checker2 = new Constant_Texture(vec3(0.1f, 0.1f, 0.1f));
+
+	int nx, ny, nn;
+	unsigned char* tex_data = stbi_load("IMG.jpg", &nx, &ny, &nn, 0);
+
 	Material* CheckerMate = new Lambertian(new Checker_Texture(Checker1, Checker2));
 	NeedFreeMaterial.push_back(CheckerMate);
 	list[0] = new Sphere(vec3(0, -1000, 0), 1000,CheckerMate);
@@ -144,8 +150,8 @@ inline Hitable* World::InitDOFSence()
 						random_double() * random_double(),
 						random_double() * random_double()));*/
 
-					Texture* diffuseTexture = new Noise_Texture(10);
-					Material* Mate = new Lambertian(diffuseTexture);
+					//Texture* diffuseTexture = new Noise_Texture(10);
+					Material* Mate = new Lambertian(new Image_Texture(tex_data, nx, ny));
 					NeedFreeMaterial.push_back(Mate);
 					list[i++] = new Sphere(center, 0.2f,Mate);
 				}
@@ -167,16 +173,21 @@ inline Hitable* World::InitDOFSence()
 		}
 	}
 
+	
+
 	Material* MateDielectric = new Dielectric(1.5);
-	Material* MateLambertian = new Lambertian(new Constant_Texture(vec3(0.4f, 0.2f, 0.1f)));
+	Material* MateLambertian = new Lambertian(new Image_Texture(tex_data, nx, ny));
 	Material* MateMetal = new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0);
 	NeedFreeMaterial.push_back(MateDielectric);
 	NeedFreeMaterial.push_back(MateLambertian);
 	NeedFreeMaterial.push_back(MateMetal);
 
+
+	
+
 	list[i++] = new Sphere(vec3(0, 1, 0), 1.0, MateDielectric);
-	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0, MateLambertian);
-	list[i++] = new Sphere(vec3(4, 1, 0), 1.0, MateMetal);
+	list[i++] = new Sphere(vec3(4, 1, 0), 1.0, MateLambertian);
+	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0, MateMetal);
 	
 	NewActor = i;
 	return new BVH_Node(list, i,0.0f,0.0f);
