@@ -9,6 +9,8 @@
 #include "Random.h"
 #include "MoveSphere.h"
 #include "BVH.h"
+#include "AARect.h"
+#include "Box.h"
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
@@ -27,6 +29,7 @@ struct MultiThreadData
 	int ny_max = 0;
 	int ny_min = 0;
 	int ns = 0;
+	vec3 background;
 	Hitable* world = nullptr;
 	Camera* Cam = nullptr;
 	HDC* dc = nullptr;
@@ -50,14 +53,15 @@ public:
 	static void SetWindowWidth(int width) {  WindowWidth=width; }
 	static int GetWindowHeigh(){ return WindowHeigh; }
 	static void SetWindowHeigh(int Height) { WindowHeigh=Height; }
-	static vec3 Color(const Ray& r, Hitable* world, int depth);
+	static vec3 Color(const Ray& r, const vec3& background, Hitable* world, int depth);
 	Hitable* InitDOFSence();
 	Hitable* InitMoveSphereSence();
-
+	Hitable* InitCornellBoxSence();
 
 	void Draw(MultiThreadData &Data);
 	void DrawDOFSence(HDC* dc);
 	void DrawMotionBlurSence(HDC* dc);
+	void DrawCornellBoxSence(HDC* dc);
 
 	static void DrawMultiThread(MultiThreadData data);
 	static void ShowSence(MultiThreadData data);
@@ -104,23 +108,32 @@ World::~World()
 	}
 }
 
-inline vec3 World::Color(const Ray& r, Hitable* world, int depth)
+inline vec3 World::Color(const Ray& r, const vec3& background, Hitable* world, int depth)
 {
 	Hit_Record rec;
-	if (world->hit(r, 0.001f, FLT_MAX, rec)) {
+	if (world->hit(r, 0.001f, FLT_MAX, rec)) 
+	{
 		Ray scattered;
 		vec3 attenuation;
-		if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) {
-			return attenuation * Color(scattered, world, depth + 1);
+		vec3 emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
+
+		if (depth < 50 && rec.mat_ptr->scatter(r, rec, attenuation, scattered)) 
+		{
+			return emitted + attenuation * Color(scattered, background, world, depth + 1);
 		}
-		else {
-			return vec3(0, 0, 0);
+		else 
+		{
+			return emitted;
 		}
 	}
-	else {
-		vec3 unit_direction = unit_vector(r.direction());
+	else 
+	{
+		// If the ray hits nothing, return the background color.
+		return background;
+		//return sky color
+		/*vec3 unit_direction = unit_vector(r.direction());
 		float t = 0.5f * (unit_direction.y() + 1.0f);
-		return (1.0f - t) * vec3(1.0f, 1.0f, 1.0f) + t * vec3(0.5f, 0.7f, 1.0f);
+		return (1.0f - t) * vec3(1.0f, 1.0f, 1.0f) + t * vec3(0.5f, 0.7f, 1.0f);*/
 	}
 }
 
@@ -252,6 +265,25 @@ inline Hitable* World::InitMoveSphereSence()
 	return new BVH_Node(list,i,0.0f,1.0f);
 }
 
+inline Hitable* World::InitCornellBoxSence()
+{
+	Hitable** list = new Hitable * [8];
+	int i = 0;
+	Material* red = new Lambertian(new Constant_Texture(vec3(0.65, 0.05, 0.05)));
+	Material* white = new Lambertian(new Constant_Texture(vec3(0.73, 0.73, 0.73)));
+	Material* green = new Lambertian(new Constant_Texture(vec3(0.12, 0.45, 0.15)));
+	Material* light = new DiffuseLight(new Constant_Texture(vec3(15, 15, 15)));
+	list[i++] = new YZRect(0, 555, 0, 555, 555, green);
+	list[i++] = new YZRect(0, 555, 0, 555, 0, red);
+	list[i++] = new XZRect(213, 343, 227, 332, 554, light);
+	list[i++] = new XZRect(0, 555, 0, 555, 555, white);
+	list[i++] = new XZRect(0, 555, 0, 555, 0, white);
+	list[i++] = new XYRect(0, 555, 0, 555, 555, white);
+	list[i++] = new Box(vec3(130, 0, 65), vec3(295, 165, 230), white);
+	list[i++] = new Box(vec3(265, 0, 295), vec3(430, 330, 460), white);
+	return new HitableList(list, i);
+}
+
 //DOF
 inline void World::DrawDOFSence(HDC* dc)
 {
@@ -261,6 +293,7 @@ inline void World::DrawDOFSence(HDC* dc)
 	data.ny_max = WindowHeigh;
 	data.ny_min = 0;
 	data.ns = 500;
+	data.background = vec3(0.70, 0.80, 1.00);
 
 	data.world = InitDOFSence();
 
@@ -287,6 +320,7 @@ inline void World::DrawMotionBlurSence(HDC* dc)
 	data.ny_max = WindowHeigh;
 	data.ny_min = 0;
 	data.ns = 1000;
+	data.background = vec3(0.70, 0.80, 1.00);
 
 	data.world = InitMoveSphereSence();
 
@@ -296,6 +330,32 @@ inline void World::DrawMotionBlurSence(HDC* dc)
 	float aperture = 0.1f;
 
 	MotionBlurCamera cam(lookfrom, lookat, vec3(0, 1, 0), 20, float(data.nx) / float(data.ny_max), aperture, dist_to_focus, 0.0f, 1.0f);
+	data.Cam = &cam;
+	data.dc = dc;
+
+	Draw(data);
+}
+
+//Cornell Box
+inline void World::DrawCornellBoxSence(HDC* dc)
+{
+	MultiThreadData data;
+
+	data.nx = WindowWidth;
+	data.ny_max = WindowHeigh;
+	data.ny_min = 0;
+	data.ns = 1000;
+	data.background = vec3(0.0, 0.0, 0.0);
+
+	data.world = InitCornellBoxSence();
+
+	vec3 lookfrom(278, 278, -800);
+	vec3 lookat(278, 278, 0);
+	float dist_to_focus = 10.0;
+	float aperture = 0.0;
+	float vfov = 40.0;
+
+	MotionBlurCamera cam(lookfrom, lookat, vec3(0, 1, 0), vfov, float(data.nx) / float(data.ny_max), aperture, dist_to_focus, 0.0f, 1.0f);
 	data.Cam = &cam;
 	data.dc = dc;
 
@@ -314,7 +374,7 @@ inline void World::DrawMultiThread(MultiThreadData data)
 				float u = float(i + random_double()) / float(WindowWidth);
 				float v = float(j + random_double()) / float(WindowHeigh);
 				Ray r = data.Cam->get_ray(u, v);
-				col += Color(r, data.world, 0);
+				col += Color(r, data.background, data.world, 0);
 			}
 			col /= float(data.ns);
 			col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));

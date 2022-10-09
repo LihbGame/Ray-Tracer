@@ -4,6 +4,7 @@
 #include "Random.h"
 #include "Texture.h"
 struct Hit_Record;
+using namespace std;
 
 float schlick(float cosine, float ref_idx) {
 	float r0 = (1 - ref_idx) / (1 + ref_idx);
@@ -43,6 +44,10 @@ class Material {
 public:
 	virtual ~Material() {};
 	virtual bool scatter(const Ray& r_in, const Hit_Record& rec, vec3& attenuation, Ray& scattered) const = 0;
+	virtual vec3 emitted(double u, double v, const vec3& p) const 
+	{
+		return vec3(0, 0, 0);
+	}
 };
 
 
@@ -121,4 +126,24 @@ public:
 	}
 private:
 	float ref_idx;
+};
+
+
+
+class DiffuseLight : public Material {
+public:
+	DiffuseLight(Texture* a) : emit(a) {}
+
+	virtual bool scatter(
+		const Ray& r_in, const Hit_Record& rec, vec3& attenuation, Ray& scattered
+	) const override {
+		return false;
+	}
+
+	virtual vec3 emitted(double u, double v, const vec3& p) const override {
+		return emit->value(u, v, p);
+	}
+
+public:
+	Texture* emit;
 };

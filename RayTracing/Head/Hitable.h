@@ -22,6 +22,14 @@ struct Hit_Record
 	vec3 p;
 	vec3 normal;
 	Material* mat_ptr;
+
+	void SetFaceNormal(vec3 ray)
+	{
+		if (dot(ray, normal) > 0.0f)
+		{
+			normal = -normal;
+		}
+	}
 };
 
 class Hitable {
