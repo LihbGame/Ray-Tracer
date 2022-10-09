@@ -195,9 +195,6 @@ inline Hitable* World::InitDOFSence()
 	NeedFreeMaterial.push_back(MateLambertian);
 	NeedFreeMaterial.push_back(MateMetal);
 
-
-	
-
 	list[i++] = new Sphere(vec3(0, 1, 0), 1.0, MateDielectric);
 	list[i++] = new Sphere(vec3(4, 1, 0), 1.0, MateLambertian);
 	list[i++] = new Sphere(vec3(-4, 1, 0), 1.0, MateMetal);
@@ -272,15 +269,15 @@ inline Hitable* World::InitCornellBoxSence()
 	Material* red = new Lambertian(new Constant_Texture(vec3(0.65, 0.05, 0.05)));
 	Material* white = new Lambertian(new Constant_Texture(vec3(0.73, 0.73, 0.73)));
 	Material* green = new Lambertian(new Constant_Texture(vec3(0.12, 0.45, 0.15)));
-	Material* light = new DiffuseLight(new Constant_Texture(vec3(15, 15, 15)));
+	Material* light = new DiffuseLight(new Constant_Texture(vec3(4, 4, 4)));
 	list[i++] = new YZRect(0, 555, 0, 555, 555, green);
 	list[i++] = new YZRect(0, 555, 0, 555, 0, red);
-	list[i++] = new XZRect(213, 343, 227, 332, 554, light);
+	list[i++] = new XZRect(113, 443, 127, 432, 500, light);
 	list[i++] = new XZRect(0, 555, 0, 555, 555, white);
 	list[i++] = new XZRect(0, 555, 0, 555, 0, white);
 	list[i++] = new XYRect(0, 555, 0, 555, 555, white);
-	list[i++] = new Box(vec3(130, 0, 65), vec3(295, 165, 230), white);
-	list[i++] = new Box(vec3(265, 0, 295), vec3(430, 330, 460), white);
+	list[i++] = new Translate(new RotateY(new Box(vec3(0, 0, 0), vec3(165, 165, 165), white), -18), vec3(130, 0, 65));
+	list[i++] = new Translate(new RotateY(new Box(vec3(0, 0, 0), vec3(165, 330, 165), white), 15), vec3(265, 0, 295));
 	return new HitableList(list, i);
 }
 
@@ -344,7 +341,7 @@ inline void World::DrawCornellBoxSence(HDC* dc)
 	data.nx = WindowWidth;
 	data.ny_max = WindowHeigh;
 	data.ny_min = 0;
-	data.ns = 1000;
+	data.ns = 2000;
 	data.background = vec3(0.0, 0.0, 0.0);
 
 	data.world = InitCornellBoxSence();
@@ -378,9 +375,9 @@ inline void World::DrawMultiThread(MultiThreadData data)
 			}
 			col /= float(data.ns);
 			col = vec3(sqrt(col[0]), sqrt(col[1]), sqrt(col[2]));
-			SenceColors[j][i].R = char(255.99 * col[0]);
-			SenceColors[j][i].G = char(255.99 * col[1]);
-			SenceColors[j][i].B = char(255.99 * col[2]);
+			SenceColors[j][i].R = int(min(255.99 * col[0], 255.99f));
+			SenceColors[j][i].G = int(min(255.99 * col[1], 255.99f));
+			SenceColors[j][i].B = int(min(255.99 * col[2], 255.99f));
 			++ColorCounts[data.ThreadID];
 		}
 	}
@@ -416,7 +413,7 @@ inline void World::ShowSence(MultiThreadData data)
 
 	} while (counts < AllPixel);
 
-	stbi_write_png("RayTracing.png", WindowWidth,WindowHeigh, 3, (char *)colorPNG, 0);
+	stbi_write_png("RayTracing.png", WindowWidth,WindowHeigh, 3, (int *)colorPNG, 0);
 	delete []colorPNG;
 }
 
