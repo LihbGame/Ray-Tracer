@@ -147,3 +147,15 @@ public:
 public:
 	Texture* emit;
 };
+
+
+class isotropic : public Material {
+public:
+	isotropic(Texture* a) : albedo(a) {}
+	virtual bool scatter(const Ray& r_in, const Hit_Record& rec, vec3& attenuation, Ray& scattered) const {
+		scattered = Ray(rec.p, random_in_unit_sphere(), r_in.time());
+		attenuation = albedo->value(rec.u, rec.v, rec.p);
+		return true;
+	}
+	Texture* albedo;
+};

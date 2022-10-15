@@ -79,6 +79,9 @@
     <ClInclude Include="Head\Box.h">
       <Filter>Head</Filter>
     </ClInclude>
+    <ClInclude Include="Head\ConstantMedium .h">
+      <Filter>Head</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="RayTracing.rc">
