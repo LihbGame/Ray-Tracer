@@ -59,6 +59,7 @@ public:
 	Hitable* InitMoveSphereSence();
 	Hitable* InitCornellBoxSence();
 	Hitable* InitCornellSmokeBoxSence();
+	Hitable* InitCornellBoxFinalSence();
 
 	void Draw(MultiThreadData &Data);
 	void DrawDOFSence(HDC* dc);
@@ -302,9 +303,54 @@ inline Hitable* World::InitCornellSmokeBoxSence()
 	list[i++] = new ConstantMedium(b1, 0.01, new Constant_Texture(vec3(1.0, 1.0, 1.0)));
 	list[i++] = new ConstantMedium(b2, 0.01, new Constant_Texture(vec3(0.0, 0.0, 0.0)));
 	return new HitableList(list, i);
+}
 
-
-	return nullptr;
+inline Hitable* World::InitCornellBoxFinalSence()
+{
+	int nb = 20;
+	Hitable** list = new Hitable * [30];
+	Hitable** boxlist = new Hitable * [10000];
+	Hitable** boxlist2 = new Hitable * [10000];
+	Material* white = new Lambertian(new Constant_Texture(vec3(0.73, 0.73, 0.73)));
+	Material* ground = new Lambertian(new Constant_Texture(vec3(0.48, 0.83, 0.53)));
+	int b = 0;
+	for (int i = 0; i < nb; i++) {
+		for (int j = 0; j < nb; j++) {
+			float w = 100;
+			float x0 = -1000 + i * w;
+			float z0 = -1000 + j * w;
+			float y0 = 0;
+			float x1 = x0 + w;
+			float y1 = 100 * (random_double() + 0.01);
+			float z1 = z0 + w;
+			boxlist[b++] = new Box(vec3(x0, y0, z0), vec3(x1, y1, z1), ground);
+		}
+	}
+	int l = 0;
+	list[l++] = new BVH_Node(boxlist, b, 0, 1);
+	Material* light = new DiffuseLight(new Constant_Texture(vec3(7, 7, 7)));
+	list[l++] = new XZRect(123, 423, 147, 412, 554, light);
+	vec3 center(400, 400, 200);
+	list[l++] = new MoveSphere(center, center + vec3(30, 0, 0), 0, 1, 50, new Lambertian(new Constant_Texture(vec3(0.7, 0.3, 0.1))));
+	list[l++] = new Sphere(vec3(260, 150, 45), 50, new Dielectric(1.5));
+	list[l++] = new Sphere(vec3(0, 150, 145), 50, new Metal(vec3(0.8, 0.8, 0.9), 10.0));
+	Hitable* boundary = new Sphere(vec3(360, 150, 145), 70, new Dielectric(1.5));
+	list[l++] = boundary;
+	list[l++] = new ConstantMedium(boundary, 0.2, new Constant_Texture(vec3(0.2, 0.4, 0.9)));
+	boundary = new Sphere(vec3(0, 0, 0), 5000, new Dielectric(1.5));
+	list[l++] = new ConstantMedium(boundary, 0.0001, new Constant_Texture(vec3(1.0, 1.0, 1.0)));
+	int nx, ny, nn;
+	unsigned char* tex_data = stbi_load("IMG.jpg", &nx, &ny, &nn, 0);
+	Material* emat = new Lambertian(new Image_Texture(tex_data, nx, ny));
+	list[l++] = new Sphere(vec3(400, 200, 400), 100, emat);
+	Texture* pertext = new Noise_Texture(0.1);
+	list[l++] = new Sphere(vec3(220, 280, 300), 80, new Lambertian(pertext));
+	int ns = 1000;
+	for (int j = 0; j < ns; j++) {
+		boxlist2[j] = new Sphere(vec3(165 * random_double(), 165 * random_double(), 165 * random_double()), 10, white);
+	}
+	list[l++] = new Translate(new RotateY(new BVH_Node(boxlist2, ns, 0.0, 1.0), 15), vec3(-100, 270, 395));
+	return new HitableList(list, l);
 }
 
 //DOF
@@ -371,7 +417,8 @@ inline void World::DrawCornellBoxSence(HDC* dc)
 	data.background = vec3(0.0, 0.0, 0.0);
 
 	//data.world = InitCornellBoxSence();
-	data.world = InitCornellSmokeBoxSence();
+	//data.world = InitCornellSmokeBoxSence();
+	data.world = InitCornellBoxFinalSence();
 
 	vec3 lookfrom(278, 278, -800);
 	vec3 lookat(278, 278, 0);
