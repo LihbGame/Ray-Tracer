@@ -1,0 +1,12 @@
+cmake_minimum_required (VERSION 3.0)
+project (RayTracing VERSION 0.1.0)
+
+file(GLOB RAY_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/RayTracing/Src/*.cpp)
+file(GLOB RAY_HEADERS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/RayTracing/Head/*.h)
+file(GLOB RAY_RESOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/RayTracing/Resource/*.*)
+
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${RAY_SOURCES} ${RAY_HEADERS} ${RAY_RESOURCES})
+
+include_directories(./RayTracing/Head)
+
+add_executable(RayTracing WIN32 ${RAY_SOURCES} ${RAY_HEADERS} ${RAY_RESOURCES})

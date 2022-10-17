@@ -338,3 +338,10 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+
+CMakeFiles/
+*.vcxproj*
+CMakeCache*
+cmake_install*
+*.sln
+RayTracing.dir/

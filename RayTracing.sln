@@ -1,31 +1,54 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30717.126
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RayTracing", "RayTracing\RayTracing.vcxproj", "{B1CD4D42-644A-4DFD-BE44-CB045C10DA13}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ALL_BUILD", "ALL_BUILD.vcxproj", "{4360354A-F6C9-39B2-AB03-112E6E876C9E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D84E9415-FA0D-3C24-AAA4-3857F0877FF5} = {D84E9415-FA0D-3C24-AAA4-3857F0877FF5}
+		{57ED09C8-E561-3039-8A01-889736979FB6} = {57ED09C8-E561-3039-8A01-889736979FB6}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RayTracing", "RayTracing.vcxproj", "{D84E9415-FA0D-3C24-AAA4-3857F0877FF5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{57ED09C8-E561-3039-8A01-889736979FB6} = {57ED09C8-E561-3039-8A01-889736979FB6}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ZERO_CHECK", "ZERO_CHECK.vcxproj", "{57ED09C8-E561-3039-8A01-889736979FB6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
+		MinSizeRel|x64 = MinSizeRel|x64
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
+		RelWithDebInfo|x64 = RelWithDebInfo|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B1CD4D42-644A-4DFD-BE44-CB045C10DA13}.Debug|x64.ActiveCfg = Debug|x64
-		{B1CD4D42-644A-4DFD-BE44-CB045C10DA13}.Debug|x64.Build.0 = Debug|x64
-		{B1CD4D42-644A-4DFD-BE44-CB045C10DA13}.Debug|x86.ActiveCfg = Debug|Win32
-		{B1CD4D42-644A-4DFD-BE44-CB045C10DA13}.Debug|x86.Build.0 = Debug|Win32
-		{B1CD4D42-644A-4DFD-BE44-CB045C10DA13}.Release|x64.ActiveCfg = Release|x64
-		{B1CD4D42-644A-4DFD-BE44-CB045C10DA13}.Release|x64.Build.0 = Release|x64
-		{B1CD4D42-644A-4DFD-BE44-CB045C10DA13}.Release|x86.ActiveCfg = Release|Win32
-		{B1CD4D42-644A-4DFD-BE44-CB045C10DA13}.Release|x86.Build.0 = Release|Win32
+		{4360354A-F6C9-39B2-AB03-112E6E876C9E}.Debug|x64.ActiveCfg = Debug|x64
+		{4360354A-F6C9-39B2-AB03-112E6E876C9E}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{4360354A-F6C9-39B2-AB03-112E6E876C9E}.Release|x64.ActiveCfg = Release|x64
+		{4360354A-F6C9-39B2-AB03-112E6E876C9E}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{D84E9415-FA0D-3C24-AAA4-3857F0877FF5}.Debug|x64.ActiveCfg = Debug|x64
+		{D84E9415-FA0D-3C24-AAA4-3857F0877FF5}.Debug|x64.Build.0 = Debug|x64
+		{D84E9415-FA0D-3C24-AAA4-3857F0877FF5}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{D84E9415-FA0D-3C24-AAA4-3857F0877FF5}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
+		{D84E9415-FA0D-3C24-AAA4-3857F0877FF5}.Release|x64.ActiveCfg = Release|x64
+		{D84E9415-FA0D-3C24-AAA4-3857F0877FF5}.Release|x64.Build.0 = Release|x64
+		{D84E9415-FA0D-3C24-AAA4-3857F0877FF5}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{D84E9415-FA0D-3C24-AAA4-3857F0877FF5}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
+		{57ED09C8-E561-3039-8A01-889736979FB6}.Debug|x64.ActiveCfg = Debug|x64
+		{57ED09C8-E561-3039-8A01-889736979FB6}.Debug|x64.Build.0 = Debug|x64
+		{57ED09C8-E561-3039-8A01-889736979FB6}.MinSizeRel|x64.ActiveCfg = MinSizeRel|x64
+		{57ED09C8-E561-3039-8A01-889736979FB6}.MinSizeRel|x64.Build.0 = MinSizeRel|x64
+		{57ED09C8-E561-3039-8A01-889736979FB6}.Release|x64.ActiveCfg = Release|x64
+		{57ED09C8-E561-3039-8A01-889736979FB6}.Release|x64.Build.0 = Release|x64
+		{57ED09C8-E561-3039-8A01-889736979FB6}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
+		{57ED09C8-E561-3039-8A01-889736979FB6}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {5A1BAC6F-193A-445E-94E8-BF61A5862E14}
+		SolutionGuid = {D48EFC84-E957-3C70-9CA5-48FC02466C2D}
 	EndGlobalSection
 EndGlobal

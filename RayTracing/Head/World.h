@@ -148,7 +148,7 @@ inline Hitable* World::InitDOFSence()
 	Texture* Checker2 = new Constant_Texture(vec3(0.1f, 0.1f, 0.1f));
 
 	int nx, ny, nn;
-	unsigned char* tex_data = stbi_load("IMG.jpg", &nx, &ny, &nn, 0);
+	unsigned char* tex_data = stbi_load("./RayTracing/Resource/IMG.jpg", &nx, &ny, &nn, 0);
 
 	Material* CheckerMate = new Lambertian(new Checker_Texture(Checker1, Checker2));
 	NeedFreeMaterial.push_back(CheckerMate);
@@ -340,7 +340,7 @@ inline Hitable* World::InitCornellBoxFinalSence()
 	boundary = new Sphere(vec3(0, 0, 0), 5000, new Dielectric(1.5));
 	list[l++] = new ConstantMedium(boundary, 0.0001, new Constant_Texture(vec3(1.0, 1.0, 1.0)));
 	int nx, ny, nn;
-	unsigned char* tex_data = stbi_load("IMG.jpg", &nx, &ny, &nn, 0);
+	unsigned char* tex_data = stbi_load("./RayTracing/Resource/IMG.jpg", &nx, &ny, &nn, 0);
 	Material* emat = new Lambertian(new Image_Texture(tex_data, nx, ny));
 	list[l++] = new Sphere(vec3(400, 200, 400), 100, emat);
 	Texture* pertext = new Noise_Texture(0.1);
