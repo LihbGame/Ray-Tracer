@@ -345,3 +345,4 @@ CMakeCache*
 cmake_install*
 *.sln
 RayTracing.dir/
+build/
