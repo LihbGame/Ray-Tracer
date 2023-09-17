@@ -1,4 +1,4 @@
-# Ray-Tracer
+# Ray Tracer
 DOF:
 ![demo](ScreenShot/screenshot01.png)
 Motion Blur:
